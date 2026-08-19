@@ -12,17 +12,17 @@ Python 3.x - no external libraries needed.
 
 ## Usage
 
-'''bash
+```bash
 # Scan ports on a specific host
 python scanner.py --host <ip> --ports <range>
 
 # Discover active hosts on a network
 python scanner.py --network <cidr>
-'''
+```
 
 ## Example
 
-'''bash
+```bash
 $ python scanner.py --host 192.168.1.1 --ports 1-1024
 Scanning 192.168.1.1 ports 1-1024
 port HTTP : 80 Open
@@ -35,4 +35,4 @@ Host 192.168.1.1 is UP!
 Host 192.168.1.5 is UP!
 
 Scan complete. 2 hosts found.
-'''
+```
