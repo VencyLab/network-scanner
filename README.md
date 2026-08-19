@@ -2,6 +2,7 @@
 
 A command-line network scanner written in Python.
 Built from scratch using only Python standard libraries.
+Host discovery uses multithreading for faster scanning.
 
 > This tool is intended for use on your own network only.
 > Scanning networks without permission is illegal.

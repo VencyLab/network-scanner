@@ -1,6 +1,7 @@
 import argparse
 import socket
 import ipaddress
+import threading
 
 services = {
     22: "SSH",
@@ -16,14 +17,21 @@ parser.add_argument("--ports", help="Port range, e.g. 1-1024")
 parser.add_argument("--network", help="IP/Network")
 args = parser.parse_args()
 
+count = 0
+lock = threading.Lock()
+
 def is_host_up(ip):
+        global count
         for port in services:
             sock = socket.socket()
             sock.settimeout(1)
             result = sock.connect_ex((str(ip), port))
             sock.close()
             if result == 0:
-                return True
+                print(f"Host {ip} is UP!")
+                with lock:
+                    count += 1
+                return
         return False
 
 if args.host and args.ports:
@@ -35,7 +43,6 @@ if args.host and args.ports:
         position = port.find("-")
         start = int(port[:position])
         end = int(port[position+1:])
-        count = 0
         for x in range(start, end+1):
             systemPort = services.get(x, "Unknown")
             sock = socket.socket()
@@ -45,7 +52,6 @@ if args.host and args.ports:
                 print(f"Port {systemPort} : {x} Open")
                 count += 1
             sock.close()
-        print(f"\nScan complete. {count} open ports found.")
 
     else:
         systemPort = services.get(int(port), "Unknown")
@@ -58,15 +64,20 @@ if args.host and args.ports:
         else:
             print(f"Port {systemPort} : {args.ports} Close")
             count = 0
-        print(f"\nScan complete. {count} open ports found.")
         sock.close()
+        
+    print(f"\nScan complete. {count} open ports found.")
+
 elif args.network:
     network = ipaddress.ip_network(args.network)
-    count = 0
+    threads = []
     for ip in network.hosts():
-        if is_host_up(ip):
-            print(f"Host {ip} is UP!")
-            count += 1
+        t = threading.Thread(target=is_host_up, args=(ip,))
+        threads.append(t)
+        t.start()
+
+    for t in threads:
+        t.join()
     print(f"\nScan complete. {count} hosts found.")
 else:
     print("Unknown")
